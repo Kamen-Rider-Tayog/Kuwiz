@@ -1,22 +1,21 @@
 {
   "name": "kuwiz",
-  "version": "1.0.0",
+  "version": "0.4.0",
   "main": "index.js",
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/free-regular-svg-icons": "^7.2.0",
-    "@fortawesome/free-solid-svg-icons": "^7.2.0",
-    "@fortawesome/react-native-fontawesome": "^1.0.0",
     "@react-navigation/bottom-tabs": "^7.17.2",
     "@react-navigation/core": "^7.19.0",
     "@react-navigation/native": "^7.3.0",
-    "expo": "~56.0.9",
+    "expo": "~56.0.11",
+    "expo-modules-core": "^56.0.16",
     "expo-status-bar": "~56.0.4",
+    "lucide-react-native": "^1.18.0",
     "react": "19.2.3",
     "react-native": "0.85.3",
-    "react-native-safe-area-context": "^5.8.0",
+    "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "^4.25.2",
-    "react-native-svg": "15.15.4"
+    "react-native-svg": "^15.15.4"
   },
   "scripts": {
     "start": "expo start",

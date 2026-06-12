@@ -1,41 +1,82 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+cd "C:\Users\L-14\Desktop\Mobile Projects\Kuwiz"
+echo "# Node
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
 
 # Expo
 .expo/
-dist/
+.expo-shared/
 web-build/
+dist/
 expo-env.d.ts
 
 # Native
-.kotlin/
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.apk
+*.aab
+*.ipa
 
 # Metro
 .metro-health-check*
 
-# debug
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Debug
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# Build outputs
+/build/
+/dist/
+/android/
+/ios/
+
+# Testing
+/coverage/
+__tests__/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+cache/
+.cache/
+
+# OS files
 .DS_Store
-*.pem
+Thumbs.db
+desktop.ini
 
-# local env files
-.env*.local
+# Large AI models
+*.gguf
+*.bin
+*.onnx
+/models/
 
-# typescript
-*.tsbuildinfo
-
-# generated native folders
-/ios
-/android
+# User data
+/documents/
+/data/
+*.db
+*.sqlite" > .gitignore

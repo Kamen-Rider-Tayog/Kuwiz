@@ -1,15 +1,26 @@
-export const colors = {
-  background: '#F0F9F0',
-  surface: '#FFFFFF',
-  primary: '#4A9B6E',
-  primaryDark: '#2D7A4E',
-  primaryLight: '#B8E0C2',
-  text: '#2C3E2F',
-  textLight: '#6B8C6E',
-  border: '#D4E8D4',
-  accent: '#FFB74D',
-  accentLight: '#FFE0B2',
-  warning: '#FF8A65',
+// src/styles/theme.js
+export const lightColors = {
+  background: '#F5F5F0',  // Soft warm white, not pure #FFF
+  surface: '#FAFAF7',    // Slightly lighter than background
+  primary: '#FF97D0',     // Pink from your palette
+  primaryDark: '#FF62BB', // Darker pink from your palette
+  accent: '#B331F1',      // Purple from your palette
+  accentLight: '#FBF5A7', // Yellow from your palette
+  text: '#2C2C28',       // Soft black, not pure #000
+  textLight: '#6B6B60',  // Soft gray
+  border: '#E8E8E0',
+};
+
+export const darkColors = {
+  background: '#1A1A1A',  // Soft dark gray, not pure #000
+  surface: '#242424',     // Slightly lighter than background
+  primary: '#FF97D0',     // Pink from your palette
+  primaryDark: '#FF62BB', // Darker pink from your palette
+  accent: '#B331F1',      // Purple from your palette
+  accentLight: '#FBF5A7', // Yellow from your palette
+  text: '#EAEAEA',        // Soft white, not pure #FFF
+  textLight: '#A0A0A0',   // Soft gray
+  border: '#333333',
 };
 
 export const spacing = {

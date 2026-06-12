@@ -1,43 +1,41 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faHouse, faClipboardList, faCircleQuestion, faUser } from '@fortawesome/free-solid-svg-icons';
+import { Home, StickyNote, User } from 'lucide-react-native';
 import HomeScreen from '../screens/HomeScreen';
 import NotesScreen from '../screens/NotesScreen';
-import QuizScreen from '../screens/QuizScreen';
 import AccountScreen from '../screens/AccountScreen';
-import { colors } from '../styles/theme';
+import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
 export default function TabNavigator() {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let icon;
+          const iconProps = { color, size, strokeWidth: 2 };
           
           if (route.name === 'Home') {
-            icon = faHouse;
+            return <Home {...iconProps} />;
           } else if (route.name === 'Notes') {
-            icon = faClipboardList;
-          } else if (route.name === 'Quiz') {
-            icon = faCircleQuestion;
+            return <StickyNote {...iconProps} />;
           } else if (route.name === 'Account') {
-            icon = faUser;
+            return <User {...iconProps} />;
           }
           
-          return <FontAwesomeIcon icon={icon} size={size} color={color} />;
+          return null;
         },
-        tabBarActiveTintColor: colors.primary,
+        tabBarActiveTintColor: colors.primaryDark,
         tabBarInactiveTintColor: colors.textLight,
         tabBarStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderTopColor: colors.background,
+          borderTopColor: colors.border,
           paddingTop: 8,
           paddingBottom: 12,
-          height: 70,
+          height: 60,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -49,7 +47,6 @@ export default function TabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Notes" component={NotesScreen} />
-      <Tab.Screen name="Quiz" component={QuizScreen} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
   );
