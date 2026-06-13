@@ -5,7 +5,8 @@ import { Home, StickyNote, User } from 'lucide-react-native';
 import HomeScreen from '../screens/HomeScreen';
 import NotesScreen from '../screens/NotesScreen';
 import AccountScreen from '../screens/AccountScreen';
-import NoteEditorScreen from '../screens/NoteEditorScreen';
+import CreateNoteScreen from '../screens/CreateNoteScreen';
+import EditNoteScreen from '../screens/EditNoteScreen';
 import { useTheme } from '../context/ThemeContext';
 
 const Tab = createBottomTabNavigator();
@@ -22,8 +23,15 @@ function NotesStack({ notes, setNotes }) {
         {(props) => <NotesScreen {...props} notes={notes} setNotes={setNotes} />}
       </Stack.Screen>
       <Stack.Screen 
-        name="NoteEditor" 
-        component={NoteEditorScreen}
+        name="CreateNote" 
+        component={CreateNoteScreen}
+        options={{
+          presentation: 'modal',
+        }}
+      />
+      <Stack.Screen 
+        name="EditNote" 
+        component={EditNoteScreen}
         options={{
           presentation: 'modal',
         }}
@@ -71,7 +79,7 @@ export default function TabNavigator({ notes, setNotes }) {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Notes">
-        {(props) => <NotesStack {...props} notes={notes} setNotes={setNotes} colors={colors} />}
+        {(props) => <NotesStack {...props} notes={notes} setNotes={setNotes} />}
       </Tab.Screen>
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>

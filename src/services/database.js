@@ -38,21 +38,11 @@ export const addNote = async (title, content) => {
       title,
       content
     );
+    console.log('Note added with ID:', result.lastInsertRowId);
     return result.lastInsertRowId;
   } catch (error) {
     console.error('Error adding note:', error);
     return null;
-  }
-};
-
-// Delete a note
-export const deleteNote = async (id) => {
-  try {
-    await db.runAsync('DELETE FROM notes WHERE id = ?', id);
-    return true;
-  } catch (error) {
-    console.error('Error deleting note:', error);
-    return false;
   }
 };
 
@@ -65,9 +55,22 @@ export const updateNote = async (id, title, content) => {
       content,
       id
     );
+    console.log('Note updated successfully:', id);
     return true;
   } catch (error) {
     console.error('Error updating note:', error);
+    return false;
+  }
+};
+
+// Delete a note
+export const deleteNote = async (id) => {
+  try {
+    await db.runAsync('DELETE FROM notes WHERE id = ?', id);
+    console.log('Note deleted successfully:', id);
+    return true;
+  } catch (error) {
+    console.error('Error deleting note:', error);
     return false;
   }
 };

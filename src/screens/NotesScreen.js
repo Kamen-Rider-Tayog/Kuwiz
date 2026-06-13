@@ -20,21 +20,25 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
 
   // Load notes from database
   const loadNotes = async () => {
+    console.log('Loading notes from database...');
     const loadedNotes = await getNotes();
+    console.log('Notes loaded:', loadedNotes.length, 'notes found');
     setNotes(loadedNotes);
   };
 
-  // Refresh when route.params.refresh changes (coming from NoteEditor)
+  // Refresh when route.params.refresh changes (coming from CreateNote)
   React.useEffect(() => {
     if (route.params?.refresh) {
+      console.log('Refresh triggered, reloading notes...');
       loadNotes();
-      // Clear the param
       navigation.setParams({ refresh: null });
+      console.log('Refresh param cleared');
     }
   }, [route.params?.refresh]);
 
   // Load notes when screen first opens
   React.useEffect(() => {
+    console.log('Initial load - screen opened');
     loadNotes();
   }, []);
 
@@ -57,12 +61,11 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
   };
 
   const handleCreateNote = () => {
+    console.log("Create Blank Note tapped");
     closeModal();
     // Hide bottom tab bar
-    navigation.getParent()?.setOptions({
-      tabBarStyle: { display: "none" },
-    });
-    navigation.navigate("NoteEditor");
+    navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+    navigation.navigate("CreateNote");
   };
 
   const handleImportDocument = () => {
@@ -71,9 +74,15 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
     console.log("Import document");
   };
 
-  const handleDeleteNote = async (id) => {
-    await deleteNote(id);
-    loadNotes(); // Reload notes after deletion
+  const handleEditNote = (item) => {
+    console.log("Edit note tapped:", item.id);
+    // Hide bottom tab bar
+    navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+    navigation.navigate("EditNote", { 
+      noteId: item.id, 
+      title: item.title, 
+      content: item.content 
+    });
   };
 
   const modalTranslateY = slideAnim.interpolate({
@@ -87,8 +96,9 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
         data={notes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
+          <TouchableOpacity 
             activeOpacity={0.7}
+            onPress={() => handleEditNote(item)}
           >
             <View
               style={[
@@ -110,11 +120,10 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
             No notes yet. Tap + to add your first note!
           </Text>
         }
-        contentContainerStyle={
-          notes.length === 0 ? styles.emptyContainer : null
-        }
+        contentContainerStyle={notes.length === 0 ? styles.emptyContainer : null}
       />
 
+      {/* Floating Action Button */}
       <TouchableOpacity
         style={[styles.fab, { backgroundColor: colors.primary }]}
         onPress={openModal}
@@ -122,6 +131,7 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
         <StickyNotePlus size={28} color="#FFFFFF" strokeWidth={2} />
       </TouchableOpacity>
 
+      {/* Custom Modal */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -235,7 +245,7 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: spacing.large + 10,
     paddingHorizontal: spacing.large,
     paddingBottom: spacing.large,
   },

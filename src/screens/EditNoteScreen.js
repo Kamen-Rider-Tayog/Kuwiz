@@ -1,62 +1,47 @@
 import React, { useState } from 'react';
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, StatusBar } from 'react-native';
-import { ArrowLeft, Save } from 'lucide-react-native';
+import { ArrowLeft } from 'lucide-react-native';
 import { useTheme } from '../context/ThemeContext';
 import { spacing, typography } from '../styles/theme';
-import { addNote } from '../services/database';
+import { updateNote } from '../services/database';
 
-export default function NoteEditorScreen({ navigation, route }) {
+export default function EditNoteScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const { noteId, title: initialTitle, content: initialContent } = route.params;
+  const [title, setTitle] = useState(initialTitle);
+  const [content, setContent] = useState(initialContent);
 
   const handleSave = async () => {
-    console.log('=== SAVE BUTTON PRESSED ===');
+    console.log('=== EDIT NOTE SAVE ===');
+    console.log('Note ID:', noteId);
     console.log('Title:', title);
     console.log('Content:', content);
     
     if (title.trim() || content.trim()) {
-      const savedId = await addNote(
-        title.trim() || 'Untitled',
-        content.trim()
-      );
-      
-      console.log('Note saved with ID:', savedId);
-      
-      if (savedId) {
-        console.log('Navigating back with refresh param');
-        // Show bottom tab bar again
-        navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
-        navigation.navigate('NotesList', { refresh: Date.now() });
-      }
-    } else {
-      console.log('Empty note, going back without saving');
-      // Show bottom tab bar again
-      navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
-      navigation.goBack();
+      await updateNote(noteId, title.trim() || 'Untitled', content.trim());
+      console.log('Note updated successfully');
     }
+    
+    // Show tab bar again
+    navigation.getParent()?.setOptions({ 
+      tabBarStyle: { 
+        display: 'flex',
+        backgroundColor: colors.surface,
+        borderTopWidth: 1,
+        borderTopColor: colors.border,
+        paddingTop: 8,
+        paddingBottom: 12,
+        height: 60,
+      }
+    });
+    // Navigate back with refresh param to reload notes
+    navigation.navigate('NotesList', { refresh: Date.now() });
   };
 
   const handleBack = () => {
-  console.log('Current colors being used:', {
-    surface: colors.surface,
-    border: colors.border,
-    isDarkMode: colors === darkColors ? 'dark' : 'light'
-  });
-  
-  navigation.getParent()?.setOptions({ 
-    tabBarStyle: { 
-      display: 'flex',
-      backgroundColor: colors.surface,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-      paddingTop: 8,
-      paddingBottom: 12,
-      height: 60,
-    }
-  });
-  navigation.goBack();
-};
+    // Auto-save on back
+    handleSave();
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -67,11 +52,12 @@ export default function NoteEditorScreen({ navigation, route }) {
           <ArrowLeft size={24} color={colors.text} />
         </TouchableOpacity>
         
-        <Text style={[styles.screenTitle, { color: colors.text }]}>New Note</Text>
+        <Text style={[styles.screenTitle, { color: colors.text }]} numberOfLines={1}>
+          {title.trim() || 'Edit Note'}
+        </Text>
         
-        <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-          <Save size={22} color={colors.primary} />
-        </TouchableOpacity>
+        {/* Empty view for spacing to keep title centered */}
+        <View style={styles.placeholder} />
       </View>
 
       <View style={styles.inputContainer}>
@@ -115,11 +101,14 @@ const styles = StyleSheet.create({
     padding: spacing.small,
   },
   screenTitle: {
+    flex: 1,
     fontSize: 18,
     fontWeight: '600',
+    textAlign: 'center',
+    marginHorizontal: spacing.medium,
   },
-  saveButton: {
-    padding: spacing.small,
+  placeholder: {
+    width: 40,
   },
   inputContainer: {
     flex: 1,
