@@ -11,11 +11,13 @@ import { useTheme } from '../context/ThemeContext';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-function NotesStack({ notes, setNotes }) {
-  const { colors } = useTheme();
-  
+function NotesStack({ notes, setNotes, colors }) {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      screenOptions={{ 
+        headerShown: false,
+      }}
+    >
       <Stack.Screen name="NotesList">
         {(props) => <NotesScreen {...props} notes={notes} setNotes={setNotes} />}
       </Stack.Screen>
@@ -69,7 +71,7 @@ export default function TabNavigator({ notes, setNotes }) {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Notes">
-        {(props) => <NotesStack {...props} notes={notes} setNotes={setNotes} />}
+        {(props) => <NotesStack {...props} notes={notes} setNotes={setNotes} colors={colors} />}
       </Tab.Screen>
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>

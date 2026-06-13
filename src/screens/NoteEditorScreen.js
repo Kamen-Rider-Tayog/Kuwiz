@@ -11,24 +11,52 @@ export default function NoteEditorScreen({ navigation, route }) {
   const [content, setContent] = useState('');
 
   const handleSave = async () => {
+    console.log('=== SAVE BUTTON PRESSED ===');
+    console.log('Title:', title);
+    console.log('Content:', content);
+    
     if (title.trim() || content.trim()) {
       const savedId = await addNote(
         title.trim() || 'Untitled',
         content.trim()
       );
       
+      console.log('Note saved with ID:', savedId);
+      
       if (savedId) {
-        // Navigate back with refresh parameter
+        console.log('Navigating back with refresh param');
+        // Show bottom tab bar again
+        navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
         navigation.navigate('NotesList', { refresh: Date.now() });
       }
     } else {
+      console.log('Empty note, going back without saving');
+      // Show bottom tab bar again
+      navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex' } });
       navigation.goBack();
     }
   };
 
   const handleBack = () => {
-    navigation.goBack();
-  };
+  console.log('Current colors being used:', {
+    surface: colors.surface,
+    border: colors.border,
+    isDarkMode: colors === darkColors ? 'dark' : 'light'
+  });
+  
+  navigation.getParent()?.setOptions({ 
+    tabBarStyle: { 
+      display: 'flex',
+      backgroundColor: colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingTop: 8,
+      paddingBottom: 12,
+      height: 60,
+    }
+  });
+  navigation.goBack();
+};
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

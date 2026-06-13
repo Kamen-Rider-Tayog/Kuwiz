@@ -3,6 +3,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from './src/context/ThemeContext';
 import TabNavigator from './src/navigation/TabNavigator';
 import { initDatabase, getNotes } from './src/services/database';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs(['Passing an object']);
 
 export default function App() {
   const [notes, setNotes] = useState([]);

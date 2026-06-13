@@ -58,6 +58,10 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
 
   const handleCreateNote = () => {
     closeModal();
+    // Hide bottom tab bar
+    navigation.getParent()?.setOptions({
+      tabBarStyle: { display: "none" },
+    });
     navigation.navigate("NoteEditor");
   };
 
@@ -83,9 +87,7 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
         data={notes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity activeOpacity={0.7}>
             <View
               style={[
                 styles.noteCard,
@@ -106,7 +108,9 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
             No notes yet. Tap + to add your first note!
           </Text>
         }
-        contentContainerStyle={notes.length === 0 ? styles.emptyContainer : null}
+        contentContainerStyle={
+          notes.length === 0 ? styles.emptyContainer : null
+        }
       />
 
       <TouchableOpacity
@@ -229,7 +233,9 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: spacing.large,
+    paddingTop: 60,
+    paddingHorizontal: spacing.large,
+    paddingBottom: spacing.large,
   },
   emptyContainer: {
     flex: 1,
