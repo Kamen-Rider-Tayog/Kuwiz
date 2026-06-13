@@ -11,7 +11,7 @@ import { useTheme } from '../context/ThemeContext';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-function NotesStack({ notes, setNotes, colors }) {
+function NotesStack({ notes, setNotes }) {
   return (
     <Stack.Navigator 
       screenOptions={{ 

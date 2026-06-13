@@ -87,7 +87,9 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
         data={notes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity activeOpacity={0.7}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+          >
             <View
               style={[
                 styles.noteCard,
