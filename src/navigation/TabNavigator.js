@@ -12,12 +12,20 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
 function NotesStack({ notes, setNotes }) {
+  const { colors } = useTheme();
+  
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="NotesList">
         {(props) => <NotesScreen {...props} notes={notes} setNotes={setNotes} />}
       </Stack.Screen>
-      <Stack.Screen name="NoteEditor" component={NoteEditorScreen} />
+      <Stack.Screen 
+        name="NoteEditor" 
+        component={NoteEditorScreen}
+        options={{
+          presentation: 'modal',
+        }}
+      />
     </Stack.Navigator>
   );
 }

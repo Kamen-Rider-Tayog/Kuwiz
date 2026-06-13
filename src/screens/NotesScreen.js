@@ -84,7 +84,6 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onLongPress={() => handleDeleteNote(item.id)}
             activeOpacity={0.7}
           >
             <View
