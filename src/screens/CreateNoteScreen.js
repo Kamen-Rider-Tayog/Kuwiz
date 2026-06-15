@@ -7,8 +7,8 @@ import { addNote } from '../services/database';
 
 export default function CreateNoteScreen({ navigation, route }) {
   const { colors } = useTheme();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState(route.params?.prefillTitle || '');
+  const [content, setContent] = useState(route.params?.prefillContent || '');
 
   const handleSave = async () => {
     console.log('=== CREATE NOTE SAVE ===');

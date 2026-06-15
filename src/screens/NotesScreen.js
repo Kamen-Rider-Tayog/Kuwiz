@@ -7,38 +7,49 @@ import {
   TouchableOpacity,
   Modal,
   Animated,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { StickyNotePlus, X, FileText, PenSquare } from "lucide-react-native";
+import * as DocumentPicker from "expo-document-picker";
+import { useOCR, models } from "react-native-executorch";
+import { initExecutorch } from "react-native-executorch";
+import { ExpoResourceFetcher } from "react-native-executorch-expo-resource-fetcher";
 import { useTheme } from "../context/ThemeContext";
 import { spacing, typography } from "../styles/theme";
-import { getNotes, deleteNote } from "../services/database";
+import { getNotes } from "../services/database";
+
+initExecutorch({ resourceFetcher: ExpoResourceFetcher });
 
 export default function NotesScreen({ navigation, route, notes, setNotes }) {
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [slideAnim] = useState(new Animated.Value(0));
+  const [processing, setProcessing] = useState(false);
+
+  const model = useOCR({ model: models.ocr.craft({ language: 'en' }) });
 
   // Load notes from database
   const loadNotes = async () => {
-    console.log('Loading notes from database...');
+    console.log("Loading notes from database...");
     const loadedNotes = await getNotes();
-    console.log('Notes loaded:', loadedNotes.length, 'notes found');
+    console.log("Notes loaded:", loadedNotes.length, "notes found");
     setNotes(loadedNotes);
   };
 
   // Refresh when route.params.refresh changes (coming from CreateNote)
   React.useEffect(() => {
     if (route.params?.refresh) {
-      console.log('Refresh triggered, reloading notes...');
+      console.log("Refresh triggered, reloading notes...");
       loadNotes();
       navigation.setParams({ refresh: null });
-      console.log('Refresh param cleared');
+      console.log("Refresh param cleared");
     }
   }, [route.params?.refresh]);
 
   // Load notes when screen first opens
   React.useEffect(() => {
-    console.log('Initial load - screen opened');
+    console.log("Initial load - screen opened");
     loadNotes();
   }, []);
 
@@ -63,25 +74,88 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
   const handleCreateNote = () => {
     console.log("Create Blank Note tapped");
     closeModal();
-    // Hide bottom tab bar
-    navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+    navigation.getParent()?.setOptions({ tabBarStyle: { display: "none" } });
     navigation.navigate("CreateNote");
   };
 
-  const handleImportDocument = () => {
+  const handleImportDocument = async () => {
+    console.log("Import Document tapped");
     closeModal();
-    // TODO: Open file picker with OCR
-    console.log("Import document");
+
+    if (processing) {
+      Alert.alert("Processing", "Please wait, still processing...");
+      return;
+    }
+
+    // Check if model is still downloading
+    if (!model.isReady && model.downloadProgress < 1) {
+      Alert.alert(
+        "Downloading OCR Model",
+        `Please wait while the OCR model downloads (${Math.round(model.downloadProgress * 100)}%). This is a one-time download.`,
+        [{ text: "OK" }],
+      );
+      return;
+    }
+
+    if (model.error) {
+      Alert.alert("Error", `Failed to load OCR model: ${model.error}`);
+      return;
+    }
+
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["image/jpeg", "image/png", "image/jpg"],
+      });
+
+      if (result.assets && result.assets[0]) {
+        const file = result.assets[0];
+        console.log("File selected:", file.name);
+
+        setProcessing(true);
+        Alert.alert("Processing", `Extracting text from ${file.name}...`);
+
+        // Run OCR
+        const ocrDetections = await model.forward(file.uri);
+
+        setProcessing(false);
+
+        if (ocrDetections && ocrDetections.length > 0) {
+          const extractedText = ocrDetections
+            .map((detection) => detection.text)
+            .join("\n");
+          console.log("Extracted text length:", extractedText.length);
+
+          navigation
+            .getParent()
+            ?.setOptions({ tabBarStyle: { display: "none" } });
+          navigation.navigate("CreateNote", {
+            prefillTitle: file.name.replace(/\.[^/.]+$/, ""),
+            prefillContent: extractedText,
+          });
+        } else {
+          Alert.alert(
+            "No Text Found",
+            "Could not extract text from this image. Try a clearer image with visible text.",
+          );
+        }
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      setProcessing(false);
+      Alert.alert(
+        "Error",
+        "Failed to process image. Make sure the image contains readable text.",
+      );
+    }
   };
 
   const handleEditNote = (item) => {
     console.log("Edit note tapped:", item.id);
-    // Hide bottom tab bar
-    navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-    navigation.navigate("EditNote", { 
-      noteId: item.id, 
-      title: item.title, 
-      content: item.content 
+    navigation.getParent()?.setOptions({ tabBarStyle: { display: "none" } });
+    navigation.navigate("EditNote", {
+      noteId: item.id,
+      title: item.title,
+      content: item.content,
     });
   };
 
@@ -92,11 +166,57 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* OCR Download Progress Indicator */}
+      {!model.isReady &&
+        model.downloadProgress < 1 &&
+        model.downloadProgress > 0 && (
+          <View
+            style={[
+              styles.progressContainer,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+          >
+            <Text style={[styles.progressText, { color: colors.text }]}>
+              Downloading OCR Model...
+            </Text>
+            <View
+              style={[styles.progressBar, { backgroundColor: colors.border }]}
+            >
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: colors.primary,
+                    width: `${model.downloadProgress * 100}%`,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={[styles.progressPercent, { color: colors.textLight }]}>
+              {Math.round(model.downloadProgress * 100)}%
+            </Text>
+          </View>
+        )}
+
+      {/* OCR Error */}
+      {model.error && (
+        <View
+          style={[
+            styles.errorContainer,
+            { backgroundColor: "#FFE5E5", borderColor: "#FF4444" },
+          ]}
+        >
+          <Text style={[styles.errorText, { color: "#FF4444" }]}>
+            OCR Error: {model.error}
+          </Text>
+        </View>
+      )}
+
       <FlatList
         data={notes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity 
+          <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => handleEditNote(item)}
           >
@@ -120,7 +240,9 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
             No notes yet. Tap + to add your first note!
           </Text>
         }
-        contentContainerStyle={notes.length === 0 ? styles.emptyContainer : null}
+        contentContainerStyle={
+          notes.length === 0 ? styles.emptyContainer : null
+        }
       />
 
       {/* Floating Action Button */}
@@ -128,7 +250,11 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
         style={[styles.fab, { backgroundColor: colors.primary }]}
         onPress={openModal}
       >
-        <StickyNotePlus size={28} color="#FFFFFF" strokeWidth={2} />
+        {processing ? (
+          <ActivityIndicator color="#FFFFFF" size="small" />
+        ) : (
+          <StickyNotePlus size={28} color="#FFFFFF" strokeWidth={2} />
+        )}
       </TouchableOpacity>
 
       {/* Custom Modal */}
@@ -209,18 +335,39 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
                   },
                 ]}
                 onPress={handleImportDocument}
+                disabled={!model.isReady && model.downloadProgress < 1}
               >
                 <View
                   style={[
                     styles.modalOptionIcon,
-                    { backgroundColor: colors.primaryLight },
+                    {
+                      backgroundColor:
+                        !model.isReady && model.downloadProgress < 1
+                          ? colors.border
+                          : colors.primaryLight,
+                    },
                   ]}
                 >
-                  <FileText size={24} color={colors.primaryDark} />
+                  <FileText
+                    size={24}
+                    color={
+                      !model.isReady && model.downloadProgress < 1
+                        ? colors.textLight
+                        : colors.primaryDark
+                    }
+                  />
                 </View>
                 <View style={styles.modalOptionText}>
                   <Text
-                    style={[styles.modalOptionTitle, { color: colors.text }]}
+                    style={[
+                      styles.modalOptionTitle,
+                      {
+                        color:
+                          !model.isReady && model.downloadProgress < 1
+                            ? colors.textLight
+                            : colors.text,
+                      },
+                    ]}
                   >
                     Import Document
                   </Text>
@@ -230,7 +377,9 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
                       { color: colors.textLight },
                     ]}
                   >
-                    Upload PDF, DOC, or Image
+                    {!model.isReady && model.downloadProgress < 1
+                      ? `Downloading OCR model... ${Math.round(model.downloadProgress * 100)}%`
+                      : "Upload Image for OCR"}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -245,9 +394,8 @@ export default function NotesScreen({ navigation, route, notes, setNotes }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: spacing.large + 10,
+    paddingVertical: spacing.large + 30,
     paddingHorizontal: spacing.large,
-    paddingBottom: spacing.large,
   },
   emptyContainer: {
     flex: 1,
@@ -343,6 +491,40 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   modalOptionDesc: {
+    fontSize: 14,
+  },
+  progressContainer: {
+    margin: spacing.medium,
+    padding: spacing.medium,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: spacing.small,
+  },
+  progressBar: {
+    height: 8,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  progressPercent: {
+    fontSize: 12,
+    marginTop: spacing.small,
+    textAlign: "right",
+  },
+  errorContainer: {
+    margin: spacing.medium,
+    padding: spacing.medium,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  errorText: {
     fontSize: 14,
   },
 });

@@ -80,3 +80,5 @@ desktop.ini
 /data/
 *.db
 *.sqlite" > .gitignore
+
+start.bat
