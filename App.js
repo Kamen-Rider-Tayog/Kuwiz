@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { ThemeProvider } from './src/context/ThemeContext';
-import TabNavigator from './src/navigation/TabNavigator';
-import { initDatabase, getNotes } from './src/services/database';
-import { LogBox } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { ThemeProvider } from "./src/context/ThemeContext";
+import { OCRProvider } from "./src/context/OCRContext";
+import TabNavigator from "./src/navigation/TabNavigator";
+import { initDatabase, getNotes } from "./src/services/database";
+import { LogBox } from "react-native";
 
-LogBox.ignoreLogs(['Passing an object']);
+LogBox.ignoreLogs(["Passing an object"]);
 
 export default function App() {
   const [notes, setNotes] = useState([]);
@@ -27,9 +28,11 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <NavigationContainer>
-        <TabNavigator notes={notes} setNotes={setNotes} />
-      </NavigationContainer>
+      <OCRProvider>
+        <NavigationContainer>
+          <TabNavigator notes={notes} setNotes={setNotes} />
+        </NavigationContainer>
+      </OCRProvider>
     </ThemeProvider>
   );
 }
